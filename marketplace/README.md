@@ -4,7 +4,7 @@ Files used for the Microsoft AppSource Partner Center listing of **Benchmark Bar
 
 ## Screenshots
 
-All in canonical Power BI marketplace size: **1280 × 720 px PNG**.
+All in the size required by Microsoft AppSource Partner Center: **1366 × 768 px PNG**.
 
 | File | Mode shown | Description |
 |------|------------|-------------|
