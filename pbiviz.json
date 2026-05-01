@@ -1,0 +1,32 @@
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/core/pbiviz.json",
+    "visual": {
+        "name": "BenchmarkBarChart",
+        "displayName": "Benchmark Bar Chart",
+        "guid": "benchmarkBarChart7B4F2A9D8E6C1B5A",
+        "visualClassName": "Visual",
+        "version": "1.7.0.0",
+        "description": "Horizontal benchmark bars comparing two measures per item, with sort modes (top/flop/all/Pareto 20-80), live search, paginated full list, distribution band, side panel, and a 5-zone variance color scale. Fully translatable, every visual aspect customizable from the format pane.",
+        "supportUrl": "https://github.com/iLoveMyData/benchmark-bar-chart/issues",
+        "gitHubUrl": "https://github.com/iLoveMyData/benchmark-bar-chart"
+    },
+    "author": {
+        "name": "Sammy KARAR",
+        "email": "karar.sammy@outlook.fr"
+    },
+    "apiVersion": "5.11.0",
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "stringResources": [
+        "stringResources/en-US",
+        "stringResources/fr-FR",
+        "stringResources/es-ES",
+        "stringResources/de-DE",
+        "stringResources/it-IT",
+        "stringResources/pt-BR",
+        "stringResources/zh-CN"
+    ]
+}

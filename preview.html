@@ -1,0 +1,1499 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<title>BenchmarkBarChart — Premium Preview v3</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  :root {
+    --bb-text:      #0E1336;
+    --bb-text-2:    #4C5275;
+    --bb-muted:     #8A8AAA;
+    --bb-grid:      #EFEFF6;
+    --bb-sep:       #E2E2EF;
+    --bb-tt-bg:     #14162E;
+    --bb-pos:       #24C38E;
+    --bb-pos-soft:  #C7EFDD;
+    --bb-neg:       #F0477A;
+    --bb-neg-soft:  #FBD2DE;
+    --bb-zone:      #DCDCEA;
+    --bb-zone-soft: #ECECF3;
+    --bb-drop-border: #E2E2EF;
+    --bb-drop-bg:   #FFFFFF;
+    --bb-drop-text: #0E1336;
+    --bb-drop-hover: #F4F1FF;
+    --bb-drop-selbg: #7E45FF;
+    --bb-drop-seltext: #FFFFFF;
+    --bb-radius-pill: 99px;
+    --bb-ease:      cubic-bezier(.2, .7, .2, 1);
+  }
+
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: #FAFAFC;
+    font-family: "Segoe UI", Roboto, sans-serif;
+    color: var(--bb-text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .frame {
+    width: 1100px; height: 600px;
+    margin: 36px auto;
+    background: #fff;
+    border: 1px solid var(--bb-sep);
+    border-radius: 18px;
+    box-shadow:
+      0 1px 2px rgba(14,19,54,.04),
+      0 30px 60px rgba(14,19,54,.08);
+    /* IMPORTANT: no overflow:hidden so the tooltip can escape */
+    position: relative;
+    opacity: 0;
+    transform: translateY(8px) scale(0.995);
+    animation: bb-frame-in 520ms var(--bb-ease) 60ms forwards;
+  }
+  @keyframes bb-frame-in {
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .bb-root {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    padding: 22px 26px 18px;
+    box-sizing: border-box;
+    overflow: hidden;            /* clip chart contents only */
+    border-radius: 18px;
+    position: relative;
+  }
+  .bb-root *, .bb-root *::before, .bb-root *::after { box-sizing: border-box; }
+
+  /* ============ Header — 2 rows : title / controls ============ */
+  .bb-head {
+    position: relative;
+    z-index: 100;
+    display: flex; flex-direction: column;
+    gap: 12px; flex: 0 0 auto;
+  }
+  .bb-head-row1 {
+    display: flex; align-items: flex-end;
+    opacity: 0;
+    animation: bb-fade-up 480ms var(--bb-ease) 180ms forwards;
+  }
+  .bb-head-row2 {
+    display: flex; align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    opacity: 0;
+    animation: bb-fade-up 480ms var(--bb-ease) 320ms forwards;
+  }
+  .bb-title {
+    font-size: 18px; font-weight: 600;
+    letter-spacing: -0.3px; line-height: 1.2;
+  }
+  .bb-sub {
+    font-size: 12.5px; color: var(--bb-muted);
+    line-height: 1.5; margin-top: 4px;
+    letter-spacing: 0.15px;
+  }
+  .bb-sub strong {
+    color: var(--bb-text-2); font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  @keyframes bb-fade-up {
+    from { opacity: 0; transform: translateY(6px); filter: blur(2px); }
+    60%  { filter: blur(0); }
+    to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+
+  /* ============ Controls (only the dropdowns now ; search is sibling) ============ */
+  .bb-controls {
+    position: relative; z-index: 200;
+    display: inline-flex; align-items: center;
+    gap: 6px; flex: 0 0 auto;
+  }
+
+  /* Search input */
+  .bb-search {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 8px 5px 10px;
+    background: var(--bb-drop-bg);
+    border: 1px solid var(--bb-drop-border);
+    border-radius: var(--bb-radius-pill);
+    transition: border-color 200ms var(--bb-ease);
+    line-height: 1;
+  }
+  .bb-search:focus-within { border-color: var(--bb-drop-selbg); }
+  .bb-search svg.bb-search-icon {
+    color: var(--bb-muted);
+    flex: 0 0 auto;
+    transition: color 200ms var(--bb-ease);
+  }
+  .bb-search:focus-within svg.bb-search-icon { color: var(--bb-drop-selbg); }
+  .bb-search input {
+    border: none; outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 12.5px;
+    width: 140px;
+    color: var(--bb-text);
+    padding: 0;
+  }
+  .bb-search input::placeholder { color: var(--bb-muted); }
+  .bb-search-clear {
+    background: transparent; border: none;
+    color: var(--bb-muted); font-size: 14px;
+    padding: 0; line-height: 1;
+    cursor: pointer;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms var(--bb-ease), background 160ms var(--bb-ease), color 160ms var(--bb-ease);
+  }
+  .bb-search.has-value .bb-search-clear {
+    opacity: 1; pointer-events: auto;
+  }
+  .bb-search-clear:hover {
+    background: rgba(126,69,255,0.10);
+    color: var(--bb-tg-on);
+  }
+
+  .bb-drop {
+    position: relative;
+    z-index: 1;
+    display: inline-flex; align-items: center;
+    background: var(--bb-drop-bg);
+    color: var(--bb-drop-text);
+    border: 1px solid var(--bb-drop-border);
+    border-radius: var(--bb-radius-pill);
+    font-size: 12.5px;
+    padding: 5px 26px 5px 12px;
+    cursor: pointer; line-height: 1.2;
+    user-select: none;
+    transition:
+      border-color 200ms var(--bb-ease),
+      opacity 200ms var(--bb-ease);
+    font-variant-numeric: tabular-nums;
+  }
+  .bb-drop:hover { border-color: var(--bb-drop-selbg); }
+  .bb-drop[aria-expanded="true"] {
+    border-color: var(--bb-drop-selbg);
+    z-index: 2000;
+  }
+  .bb-drop.is-disabled {
+    opacity: 0.36;
+    pointer-events: none;
+    text-decoration: line-through;
+  }
+  .bb-drop-dv { pointer-events: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+  .bb-drop-icon { font-size: 11px; opacity: 0.7; }
+  .bb-drop-arrow {
+    position: absolute; right: 9px; top: 50%;
+    transform: translateY(-50%) rotate(0deg);
+    pointer-events: none;
+    transition: transform 220ms var(--bb-ease);
+  }
+  .bb-drop[aria-expanded="true"] .bb-drop-arrow {
+    transform: translateY(-50%) rotate(180deg);
+  }
+  .bb-drop-menu {
+    position: absolute; top: calc(100% + 6px); right: 0;
+    min-width: 100%;
+    background: #fff; color: var(--bb-text);
+    border: 1px solid var(--bb-drop-border);
+    border-radius: 10px;
+    box-shadow:
+      0 1px 2px rgba(14,19,54,.10),
+      0 12px 28px rgba(14,19,54,.20);
+    padding: 5px; z-index: 2500;
+    font-size: 12.5px;
+    opacity: 0;
+    transform: translateY(-4px);
+    animation: bb-menu-in 200ms var(--bb-ease) forwards;
+  }
+  @keyframes bb-menu-in { to { opacity: 1; transform: translateY(0); } }
+  .bb-drop-opt {
+    padding: 7px 12px; border-radius: 7px;
+    cursor: pointer; white-space: nowrap;
+    transition: background 140ms var(--bb-ease), color 140ms var(--bb-ease);
+    line-height: 1.3;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .bb-drop-opt:hover { background: var(--bb-drop-hover); }
+  .bb-drop-opt.is-selected {
+    background: var(--bb-drop-selbg);
+    color: var(--bb-drop-seltext);
+    font-weight: 600;
+  }
+  .bb-drop-opt-main { display: inline-flex; align-items: center; gap: 8px; }
+  .bb-drop-opt-icon { font-size: 11px; opacity: 0.85; width: 12px; text-align: center; }
+  .bb-drop-opt-hint {
+    font-size: 11px; color: var(--bb-muted);
+    margin-left: auto; padding-left: 12px;
+  }
+  .bb-drop-opt.is-selected .bb-drop-opt-hint { color: rgba(255,255,255,0.7); }
+
+  /* ============ Layout : main = chart-area + panel sur toute la hauteur ============ */
+  .bb-main {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: stretch;
+    min-height: 0;
+    gap: 12px;
+  }
+  .bb-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+  }
+  .bb-chart-wrap {
+    flex: 1 1 auto; min-width: 0; min-height: 0;
+    position: relative;
+    margin-top: 14px;
+  }
+  .bb-chart {
+    width: 100%; height: 100%;
+    display: block;
+    overflow: visible;
+  }
+  .bb-chart text { user-select: none; }
+
+  /* ============ Empty state ============ */
+  .bb-empty {
+    position: absolute; inset: 0;
+    display: none; align-items: center; justify-content: center;
+    text-align: center;
+    pointer-events: none;
+  }
+  .bb-empty.is-on { display: flex; }
+  .bb-empty-card {
+    max-width: 360px;
+    padding: 20px 24px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #FFFFFF 0%, #F6F2FF 100%);
+    border: 1px solid #EDE7FC;
+    box-shadow: 0 10px 30px rgba(14, 19, 54, 0.06);
+    animation: bb-empty-in 480ms var(--bb-ease) both;
+  }
+  .bb-empty-title {
+    font-size: 14px; font-weight: 700;
+    color: var(--bb-text); letter-spacing: -0.2px;
+  }
+  .bb-empty-desc {
+    font-size: 12.5px; color: var(--bb-text-2);
+    margin-top: 6px; line-height: 1.45;
+  }
+  @keyframes bb-empty-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ============ Side panel ============ */
+  .bb-panel {
+    flex: 0 0 auto;
+    width: 220px;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    padding: 6px 14px 8px 18px;
+    border-left: 1px solid var(--bb-sep);
+    overflow: hidden;
+    box-sizing: border-box;
+    transform-origin: right center;
+    animation: bb-panel-in 380ms var(--bb-ease) 460ms both;
+  }
+  .bb-pn-blocks {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 0;
+  }
+  .bb-pn-head {
+    flex: 0 0 auto;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--bb-muted);
+    margin: 0 0 8px 0;
+    animation: bb-panel-child-in 340ms var(--bb-ease) 520ms both;
+  }
+  .bb-pn-total {
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.6px;
+    color: var(--bb-text);
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+  }
+  .bb-pn-total-lbl {
+    font-size: 11px;
+    color: var(--bb-muted);
+    line-height: 1.2;
+    letter-spacing: 0.2px;
+    margin-top: 4px;
+  }
+  .bb-pn-blk {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 8px 0;
+    animation: bb-panel-child-in 340ms var(--bb-ease) both;
+  }
+  .bb-pn-blk:nth-of-type(1) { animation-delay: 580ms; }
+  .bb-pn-blk:nth-of-type(2) { animation-delay: 620ms; }
+  .bb-pn-blk:nth-of-type(3) { animation-delay: 660ms; }
+  .bb-pn-blk:nth-of-type(4) { animation-delay: 700ms; }
+  .bb-pn-blk:nth-of-type(5) { animation-delay: 740ms; }
+  .bb-pn-blk + .bb-pn-blk {
+    border-top: 1px solid var(--bb-sep);
+  }
+  .bb-pn-lbl {
+    font-size: 11px;
+    color: var(--bb-muted);
+    line-height: 1.2;
+    letter-spacing: 0.2px;
+  }
+  .bb-pn-val {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--bb-text);
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+    letter-spacing: -0.1px;
+  }
+  .bb-pn-val.pos { color: var(--bb-pos); }
+  .bb-pn-val.neg { color: var(--bb-neg); }
+  .bb-pn-val-name {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-top: 3px;
+    letter-spacing: -0.1px;
+    white-space: normal;
+    word-break: break-word;
+    cursor: pointer;
+    color: var(--bb-text);     /* always neutral — names are identifiers, not status */
+    transition: color 200ms var(--bb-ease);
+  }
+  .bb-pn-val-name:hover { color: var(--bb-tg-on); }
+  .bb-pn-sub {
+    font-size: 11.5px;
+    color: var(--bb-text-2);
+    line-height: 1.35;
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+  }
+  .bb-pn-sub strong {
+    font-weight: 600;
+    color: var(--bb-text);
+  }
+  .bb-pn-tag {
+    display: inline-flex; align-items: center;
+    gap: 4px;
+    margin-top: 5px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    width: fit-content;
+  }
+  .bb-pn-tag.pos { background: var(--bb-pos-soft); color: var(--bb-pos); }
+  .bb-pn-tag.neg { background: var(--bb-neg-soft); color: var(--bb-neg); }
+
+  /* Distribution band */
+  .bb-pn-dist { margin-top: 6px; }
+  .bb-pn-dist-band {
+    width: 100%;
+    height: 22px;
+    display: block;
+    overflow: visible;
+  }
+  .bb-pn-dist-axis {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 10px;
+    font-size: 11.5px;
+    letter-spacing: 0.2px;
+    font-variant-numeric: tabular-nums;
+  }
+  .bb-pn-dist-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--bb-text-2);
+    line-height: 1.3;
+  }
+  .bb-pn-dist-row strong {
+    font-weight: 600;
+    color: var(--bb-text);
+    min-width: 22px;
+    font-variant-numeric: tabular-nums;
+  }
+  .bb-pn-dist-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+  }
+  .bb-pn-dist-dot.is-tol {
+    background: var(--bb-zone-soft);
+    border: 1px solid var(--bb-zone);
+  }
+  .bb-dist-seg { cursor: help; transition: filter 180ms var(--bb-ease); }
+  .bb-dist-seg:hover { filter: brightness(1.08); }
+  .bb-dist-tick { stroke: #fff; stroke-width: 2; pointer-events: none; }
+
+  /* Pager */
+  .bb-pager {
+    position: absolute;
+    bottom: 2px; right: 4px;
+    display: flex; align-items: center; gap: 2px;
+    font-size: 11px;
+    color: var(--bb-muted);
+    font-variant-numeric: tabular-nums;
+    user-select: none;
+    letter-spacing: 0.2px;
+    z-index: 30;
+    pointer-events: auto;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(2px);
+    padding: 3px 6px;
+    border-radius: 99px;
+    border: 1px solid var(--bb-sep);
+    opacity: 0;
+    transition: opacity 220ms var(--bb-ease);
+  }
+  .bb-pager.is-shown { opacity: 1; }
+  .bb-pager-btn {
+    background: transparent;
+    border: none;
+    color: var(--bb-text-2);
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    transition: background 160ms var(--bb-ease), color 160ms var(--bb-ease);
+  }
+  .bb-pager-btn:hover:not(:disabled) {
+    background: rgba(126,69,255,0.10);
+    color: var(--bb-tg-on);
+  }
+  .bb-pager-btn:disabled {
+    color: var(--bb-muted);
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .bb-pager-info {
+    padding: 0 6px;
+    font-weight: 500;
+    color: var(--bb-text-2);
+  }
+
+  /* Shine sweep on initial bars render */
+  .bb-shine { mix-blend-mode: screen; pointer-events: none; }
+
+  @keyframes bb-panel-in {
+    0%   { opacity: 0; transform: translateX(18px) scale(0.96); filter: blur(2px); }
+    60%  { filter: blur(0); }
+    100% { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+  }
+  @keyframes bb-panel-child-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============ SVG ============ */
+  .bb-row-lbl {
+    font-size: 12px;
+    fill: var(--bb-text);
+    font-weight: 500;
+    letter-spacing: 0.1px;
+    pointer-events: none;
+  }
+  .bb-row-val-primary {
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.1px;
+    pointer-events: none;
+  }
+  .bb-row-val-secondary {
+    font-size: 10.5px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.1px;
+    pointer-events: none;
+    fill: var(--bb-muted);
+  }
+  .bb-track { pointer-events: none; }
+  .bb-bar {
+    cursor: pointer;
+    transition: filter 220ms var(--bb-ease);
+  }
+  .bb-bar.is-hover {
+    filter:
+      brightness(1.05)
+      drop-shadow(0 3px 8px rgba(14,19,54,0.14));
+  }
+  .bb-bar.is-flash {
+    animation: bb-flash 1200ms var(--bb-ease);
+  }
+  @keyframes bb-flash {
+    0%   { filter: drop-shadow(0 0 0 transparent); }
+    25%  { filter: drop-shadow(0 0 12px rgba(126,69,255,0.55)) brightness(1.10); }
+    100% { filter: drop-shadow(0 0 0 transparent); }
+  }
+
+  .bb-cible-line {
+    stroke: var(--bb-muted);
+    stroke-width: 1;
+    stroke-dasharray: 3 4;
+    pointer-events: none;
+  }
+  .bb-cible-lbl {
+    font-size: 9.5px;
+    fill: var(--bb-muted);
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    pointer-events: none;
+  }
+
+  /* ============ Tooltip — promoted to body level via JS, OR inside a high-z layer ============ */
+  /* Tooltip is appended to .frame so it can escape .bb-root overflow:hidden */
+  .bb-tt {
+    position: absolute;
+    pointer-events: none;
+    background: var(--bb-tt-bg);
+    color: #fff;
+    padding: 11px 14px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    box-shadow:
+      0 1px 2px rgba(14,19,54,.20),
+      0 14px 32px rgba(14,19,54,.22);
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 14px)) scale(0.94);
+    transform-origin: 50% 100%;
+    transition:
+      opacity 200ms var(--bb-ease),
+      transform 280ms var(--bb-ease);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    z-index: 9000;          /* above everything inside .frame */
+    min-width: 240px;
+  }
+  .bb-tt.is-on {
+    opacity: 1;
+    transform: translate(-50%, calc(-100% - 14px)) scale(1);
+  }
+  .bb-tt.is-below {
+    transform: translate(-50%, 14px) scale(0.94);
+    transform-origin: 50% 0;
+  }
+  .bb-tt.is-below.is-on {
+    transform: translate(-50%, 14px) scale(1);
+  }
+  .bb-tt::after {
+    content: '';
+    position: absolute; left: 50%;
+    width: 10px; height: 10px;
+    background: var(--bb-tt-bg);
+    border-radius: 1px;
+    bottom: -5px;
+    transform: translate(-50%, 0) rotate(45deg);
+  }
+  .bb-tt.is-below::after {
+    bottom: auto;
+    top: -5px;
+  }
+  .bb-tt-title {
+    font-weight: 700; margin-bottom: 6px;
+    font-size: 13px;
+    letter-spacing: -0.1px;
+  }
+  .bb-tt-row {
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 18px; margin-top: 3px;
+  }
+  .bb-tt-row .k { color: #B6B7C8; }
+  .bb-tt-row .v { font-weight: 600; color: #fff; }
+  .bb-tt-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.12);
+    margin: 7px 0 5px;
+  }
+  .bb-tt-delta {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .bb-tt-delta.pos { color: #6BE5B5; }
+  .bb-tt-delta.neg { color: #FFA1BB; }
+</style>
+</head>
+<body>
+
+<div class="frame" id="frame">
+  <div class="bb-root">
+    <div class="bb-main">
+      <div class="bb-content">
+        <div class="bb-head">
+          <div class="bb-head-row1">
+            <div class="bb-title" id="title"></div>
+          </div>
+          <div class="bb-head-row2">
+            <div class="bb-controls">
+              <div class="bb-search" id="search-wrap">
+                <svg class="bb-search-icon" width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <circle cx="5.5" cy="5.5" r="3.8" stroke="currentColor" stroke-width="1.4"/>
+                  <path d="M8.4 8.4 L11.5 11.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+                <input type="text" id="search-input" placeholder="Filtrer un projet…" />
+                <button class="bb-search-clear" id="search-clear" aria-label="Effacer">×</button>
+              </div>
+              <div class="bb-drop" id="drop-mode"   tabindex="0" aria-expanded="false"></div>
+              <div class="bb-drop" id="drop-metric" tabindex="0" aria-expanded="false"></div>
+              <div class="bb-drop" id="drop-n"      tabindex="0" aria-expanded="false"></div>
+            </div>
+          </div>
+        </div>
+        <div class="bb-chart-wrap" id="chart-wrap">
+          <svg class="bb-chart" id="chart">
+            <defs>
+              <linearGradient id="bb-shine-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"  stop-color="#fff" stop-opacity="0"/>
+                <stop offset="50%" stop-color="#fff" stop-opacity="0.6"/>
+                <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="bb-empty" id="empty">
+            <div class="bb-empty-card">
+              <div class="bb-empty-title">Aucun élément à afficher</div>
+              <div class="bb-empty-desc">
+                Le filtre courant ne renvoie aucun item.
+                Essaie un autre tri ou élargis la sélection.
+              </div>
+            </div>
+          </div>
+          <div class="bb-pager" id="pager">
+            <button class="bb-pager-btn" id="pg-prev" aria-label="Page précédente">‹</button>
+            <span class="bb-pager-info" id="pg-info">1 / 1</span>
+            <button class="bb-pager-btn" id="pg-next" aria-label="Page suivante">›</button>
+          </div>
+        </div>
+      </div>
+      <aside class="bb-panel" id="panel"></aside>
+    </div>
+  </div>
+  <!-- Tooltip is sibling of .bb-root, inside .frame (no overflow clipping) -->
+  <div class="bb-tt" id="tt"></div>
+</div>
+
+<script>
+/* =========================================================
+   BenchmarkBarChart — Premium Preview v3
+
+   - 3 dropdowns : Tri (direction) · Métrique (% / abs) · N
+   - "Pareto 20/80" est une option de TRI (pas de N) ;
+     quand sélectionnée, le dropdown N est désactivé et
+     le nombre d'items est calculé automatiquement.
+   - Métrique abs : barres en valeur absolue, marqueur
+     cible par ligne, étiquettes "valeur (pourcentage)".
+   - Métrique % : barres indexées sur la cible (100% partagé).
+   - Tooltip portail au niveau .frame, flip auto haut/bas,
+     plus de clipping.
+   ========================================================= */
+
+const CONFIG = {
+  title:        'Suivi du portefeuille projets',
+  subtitle:     'Comparaison entre {m1} et {m2}',
+  itemSingular: 'projet',
+  itemPlural:   'projets',
+  m1:           'Prévu',
+  m2:           'Réalisé',
+  unit:         'k€',
+  overTerm:        'dépassement',
+  underTerm:       'retard',
+  overTermPlural:  'dépassements',
+  underTermPlural: 'retards',
+  overIsBad:    true,
+  modeFlopLabel:   'Dépassements',
+  modeTopLabel:    'Retards',
+  modeAllLabel:    'Tous classés',
+  modeParetoLabel: 'Pareto 20/80',
+  metricPctLabel:  'Écart en %',
+  metricAbsLabel:  'Valeur absolue',
+  autoNCap:        10
+};
+
+/* ----- Demo dataset (100 items = 25 base × 4 vagues) ----- */
+const BASE_NAMES = [
+  'Refonte SI Achats', 'Déploiement EDI', 'Migration ERP',
+  'Optimisation flux logistique', 'Lancement gamme bio',
+  'Programme efficacité', 'Digitalisation HR', 'Cyber sécurité phase 2',
+  'Refonte site corporate', 'Modernisation data plateforme',
+  'Consolidation comptable', 'Acquisition concurrent',
+  'POC IA prédictive', 'Restructuration achats', 'Implémentation Salesforce',
+  'Programme RSE', 'Modernisation OT', 'Migration cloud',
+  'Refonte référentiel produit', 'Programme transformation',
+  'Audit externe', 'Conformité GDPR phase 3', 'Optimisation supply',
+  'Lancement marketplace', 'Programme bien-être'
+];
+const SUFFIXES = ['', ' v2', ' phase 2', ' bis'];
+const DEMO_NAMES = SUFFIXES.flatMap(s => BASE_NAMES.map(n => n + s));
+function jitU(key) {
+  let h = 2166136261;
+  for (let i = 0; i < key.length; i++) {
+    h ^= key.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return ((h >>> 0) % 10000) / 10000;
+}
+const DATA = DEMO_NAMES.map((name, i) => {
+  const m1 = 120 + Math.round(jitU(name + 'p') * 680);
+  const direction = jitU(name + 'd') < 0.62 ? 1 : -1;
+  const magnitude = jitU(name + 'm') * 0.45;
+  const m2 = Math.round(m1 * (1 + direction * magnitude));
+  return {
+    id:  'i' + i,
+    name,
+    m1, m2,
+    delta: m2 - m1,
+    pct:   ((m2 - m1) / m1) * 100,
+    ratio: m2 / m1
+  };
+});
+
+/* ----- Helpers ----- */
+const fmt     = (n) => d3.format(',.0f')(n).replace(/,/g, ' ');
+const fmtPct  = (n) => (n > 0 ? '+' : '') + d3.format('.1f')(n) + '%';
+const fmtSign = (n) => (n > 0 ? '+' : '') + fmt(n);
+
+const STATE = {
+  mode:   'flop',    // flop | top | all | pareto
+  metric: 'abs',     // pct | abs
+  n:      'auto',    // auto | 5 | 10 | 15 | 20 | all
+  page:   0,         // current page index (only used when n === 'all')
+  search: ''         // free-text filter on item name
+};
+const PAGE_SIZE = 20;
+
+const MODE_OPTS = [
+  { id: 'flop',   icon: '↓', label: CONFIG.modeFlopLabel,   hint: 'écart positif' },
+  { id: 'top',    icon: '↑', label: CONFIG.modeTopLabel,    hint: 'écart négatif' },
+  { id: 'all',    icon: '≡', label: CONFIG.modeAllLabel,    hint: 'sans filtre' },
+  { id: 'pareto', icon: '◉', label: CONFIG.modeParetoLabel, hint: 'écarts dominants' }
+];
+const METRIC_OPTS = [
+  { id: 'pct', label: 'Écart %',     hint: 'classement relatif' },
+  { id: 'abs', label: 'Valeur k€',   hint: 'classement absolu' }
+];
+const N_OPTS = [
+  { id: 'auto', label: 'Auto',  hint: 'jusqu\'à ' + CONFIG.autoNCap },
+  { id: 5,      label: '5' },
+  { id: 10,     label: '10' },
+  { id: 15,     label: '15' },
+  { id: 20,     label: '20' },
+  { id: 'all',  label: 'Tous' }
+];
+
+document.getElementById('title').textContent = CONFIG.title;
+
+/* ----- Color helpers — bins shared with distribution band ----- */
+function binFor(pct) {
+  if (pct < -20) return { side: 'under', deep: true  };
+  if (pct < -5)  return { side: 'under', deep: false };
+  if (pct <= 5)  return { side: 'tol',   deep: false };
+  if (pct <= 20) return { side: 'over',  deep: false };
+  return            { side: 'over',  deep: true  };
+}
+function colorForBin(bin) {
+  if (bin.side === 'tol') return 'var(--bb-zone-soft)';
+  const overFill  = CONFIG.overIsBad ? 'var(--bb-neg)' : 'var(--bb-pos)';
+  const underFill = CONFIG.overIsBad ? 'var(--bb-pos)' : 'var(--bb-neg)';
+  const overSoft  = CONFIG.overIsBad ? 'var(--bb-neg-soft)' : 'var(--bb-pos-soft)';
+  const underSoft = CONFIG.overIsBad ? 'var(--bb-pos-soft)' : 'var(--bb-neg-soft)';
+  if (bin.side === 'over')  return bin.deep ? overFill  : overSoft;
+  return bin.deep ? underFill : underSoft;
+}
+function colorClass(pct) {
+  if (pct === 0) return '';
+  const isOver = pct > 0;
+  return (isOver === CONFIG.overIsBad) ? 'neg' : 'pos';
+}
+// Bar fill : 5-zone scale (matches distribution bins)
+function colorForPct(pct) {
+  return colorForBin(binFor(pct));
+}
+// Label text : 3-zone scale (sur cible → muted; otherwise saturated)
+function labelColorForPct(pct) {
+  if (Math.abs(pct) <= 5) return 'var(--bb-text-2)';
+  return (pct > 0) === CONFIG.overIsBad ? 'var(--bb-neg)' : 'var(--bb-pos)';
+}
+
+/* ----- Filtering / sorting ----- */
+function sortKey(d) {
+  return STATE.metric === 'abs' ? Math.abs(d.delta) : Math.abs(d.pct);
+}
+function paretoCount(arr) {
+  const totalAbs = d3.sum(arr, sortKey);
+  if (totalAbs === 0) return arr.length;
+  let cum = 0;
+  for (let i = 0; i < arr.length; i++) {
+    cum += sortKey(arr[i]);
+    if (cum >= 0.80 * totalAbs) return Math.max(3, Math.min(20, i + 1));
+  }
+  return Math.min(20, arr.length);
+}
+/* Effective dataset = DATA filtered by free-text search */
+function searchFilter(arr) {
+  if (!STATE.search) return arr;
+  const q = STATE.search.toLowerCase();
+  return arr.filter(d => d.name.toLowerCase().includes(q));
+}
+function effectiveData() { return searchFilter(DATA); }
+
+// Returns { rows, totalPages, totalAfterFilter }
+function filterAndSort() {
+  let arr = effectiveData();
+
+  if (STATE.mode === 'pareto') {
+    arr.sort((a, b) => sortKey(b) - sortKey(a));
+    const sliced = arr.slice(0, paretoCount(arr));
+    return { rows: sliced, totalPages: 1, totalAfterFilter: sliced.length };
+  }
+
+  if (STATE.mode === 'flop')      arr = arr.filter(d => d.pct > 0);
+  else if (STATE.mode === 'top')  arr = arr.filter(d => d.pct < 0);
+
+  if (STATE.metric === 'abs') {
+    if (STATE.mode === 'flop')      arr.sort((a, b) => b.delta - a.delta);
+    else if (STATE.mode === 'top')  arr.sort((a, b) => a.delta - b.delta);
+    else                            arr.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+  } else {
+    if (STATE.mode === 'flop')      arr.sort((a, b) => b.pct - a.pct);
+    else if (STATE.mode === 'top')  arr.sort((a, b) => a.pct - b.pct);
+    else                            arr.sort((a, b) => Math.abs(b.pct) - Math.abs(a.pct));
+  }
+
+  if (STATE.n === 'all') {
+    const totalPages = Math.max(1, Math.ceil(arr.length / PAGE_SIZE));
+    if (STATE.page >= totalPages) STATE.page = totalPages - 1;
+    if (STATE.page < 0) STATE.page = 0;
+    const start = STATE.page * PAGE_SIZE;
+    return {
+      rows: arr.slice(start, start + PAGE_SIZE),
+      totalPages,
+      totalAfterFilter: arr.length
+    };
+  }
+
+  let cap;
+  if (STATE.n === 'auto') cap = Math.min(CONFIG.autoNCap, arr.length);
+  else                    cap = STATE.n;
+  return {
+    rows: arr.slice(0, cap),
+    totalPages: 1,
+    totalAfterFilter: arr.length
+  };
+}
+
+/* ----- Dropdowns ----- */
+function buildDrop(elId, opts, currentId, onPick, formatTrigger) {
+  const el = document.getElementById(elId);
+  el.innerHTML = '';
+  const cur = opts.find(o => o.id === currentId) || opts[0];
+  el.innerHTML = `
+    <span class="bb-drop-dv">${formatTrigger(cur)}</span>
+    <svg class="bb-drop-arrow" width="10" height="10" viewBox="0 0 10 10">
+      <path d="M2 3.5 L5 6.5 L8 3.5" stroke="currentColor" stroke-width="1.5"
+            fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+  function open() {
+    if (el.querySelector('.bb-drop-menu')) return;
+    el.setAttribute('aria-expanded', 'true');
+    const menu = document.createElement('div');
+    menu.className = 'bb-drop-menu';
+    opts.forEach(opt => {
+      const o = document.createElement('div');
+      o.className = 'bb-drop-opt' + (opt.id === currentId ? ' is-selected' : '');
+      const iconHTML = opt.icon ? `<span class="bb-drop-opt-icon">${opt.icon}</span>` : '<span class="bb-drop-opt-icon"></span>';
+      const hintHTML = opt.hint ? `<span class="bb-drop-opt-hint">${opt.hint}</span>` : '';
+      o.innerHTML = `<span class="bb-drop-opt-main">${iconHTML}${opt.label}</span>${hintHTML}`;
+      o.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        onPick(opt.id);
+      });
+      menu.appendChild(o);
+    });
+    el.appendChild(menu);
+  }
+  function close() {
+    el.setAttribute('aria-expanded', 'false');
+    const m = el.querySelector('.bb-drop-menu');
+    if (m) m.remove();
+  }
+  el.onclick = () => {
+    if (el.classList.contains('is-disabled')) return;
+    if (el.getAttribute('aria-expanded') === 'true') close();
+    else open();
+  };
+  el._close = close;
+}
+document.addEventListener('mousedown', (e) => {
+  ['drop-mode', 'drop-metric', 'drop-n'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.contains(e.target) && el._close) el._close();
+  });
+});
+
+function rebuildDrops() {
+  buildDrop('drop-mode', MODE_OPTS, STATE.mode, (id) => {
+    STATE.mode = id;
+    STATE.page = 0;
+    // "Tous classés" implies showing everything → force N to "Tous"
+    if (id === 'all') STATE.n = 'all';
+    rebuildDrops(); render();
+  }, (opt) => `<span class="bb-drop-icon">${opt.icon}</span>${opt.label}`);
+
+  buildDrop('drop-metric', METRIC_OPTS, STATE.metric, (id) => {
+    STATE.metric = id;
+    STATE.page = 0;
+    rebuildDrops(); render();
+  }, (opt) => opt.label);
+
+  buildDrop('drop-n', N_OPTS, STATE.n, (id) => {
+    STATE.n = id;
+    STATE.page = 0;
+    rebuildDrops(); render();
+  }, (opt) => opt.label);
+
+  const isPareto = STATE.mode === 'pareto';
+  const isAll    = STATE.mode === 'all';
+  // N is auto-determined when mode = pareto OR all
+  document.getElementById('drop-n').classList.toggle('is-disabled', isPareto || isAll);
+}
+
+/* ----- Render ----- */
+const svg  = d3.select('#chart');
+const wrap = document.getElementById('chart-wrap');
+const tt   = d3.select('#tt');
+const emptyEl = document.getElementById('empty');
+
+let firstRender = true;
+
+function render() {
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  svg.attr('viewBox', `0 0 ${W} ${H}`).attr('width', W).attr('height', H);
+
+  const { rows, totalPages, totalAfterFilter } = filterAndSort();
+  renderPager(totalPages);
+
+  if (rows.length === 0) {
+    svg.selectAll('g.bb-root-g > g').selectAll('*')
+      .transition().duration(220).style('opacity', 0).remove();
+    emptyEl.classList.add('is-on');
+    renderPanel([]);
+    return;
+  }
+  emptyEl.classList.remove('is-on');
+
+  // Bar = magnitude of écart. Length = |delta| (or |pct|).
+  // No track, no cible reference: the écart IS the message.
+  const RIGHT_PAD = STATE.metric === 'abs' ? 110 : 70;
+  const PAD = { top: 14, right: RIGHT_PAD, bottom: 6, left: 200 };
+  const innerW = W - PAD.left - PAD.right;
+  const innerH = H - PAD.top - PAD.bottom;
+
+  const ROW_MIN = 22, ROW_MAX = 56;
+  let rowH = innerH / rows.length;
+  if (rowH > ROW_MAX) rowH = ROW_MAX;
+  if (rowH < ROW_MIN) rowH = ROW_MIN;
+  const totalH = rowH * rows.length;
+  const yOffset = Math.max(0, (innerH - totalH) / 2);
+
+  const y = d3.scaleBand()
+    .domain(rows.map(d => d.id))
+    .range([yOffset, yOffset + totalH])
+    .paddingInner(0.30)
+    .paddingOuter(0.10);
+
+  // X scale: 0 → max magnitude of écart
+  const magOf = (d) => STATE.metric === 'abs' ? Math.abs(d.delta) : Math.abs(d.pct);
+  const maxMag = d3.max(rows, magOf) || 1;
+  const x = d3.scaleLinear().domain([0, maxMag * 1.04]).range([0, innerW]);
+
+  let root = svg.select('g.bb-root-g');
+  if (root.empty()) {
+    root = svg.append('g').attr('class', 'bb-root-g');
+    root.append('g').attr('class', 'bb-bars');
+    root.append('g').attr('class', 'bb-row-lbls');
+    root.append('g').attr('class', 'bb-row-vals');
+  }
+  root.attr('transform', `translate(${PAD.left},${PAD.top})`);
+
+  // ---- Bars ----
+  const barSel = root.select('g.bb-bars').selectAll('rect.bb-bar').data(rows, d => d.id);
+  barSel.exit()
+    .transition().duration(280).ease(d3.easeCubicIn)
+    .attr('width', 0).style('opacity', 0).remove();
+  const barEnter = barSel.enter().append('rect')
+    .attr('class', 'bb-bar')
+    .attr('data-id', d => d.id)
+    .attr('rx', 6).attr('ry', 6)
+    .attr('y', d => y(d.id))
+    .attr('height', y.bandwidth())
+    .attr('x', 0).attr('width', 0)
+    .attr('fill', d => colorForPct(d.pct))
+    .style('opacity', 0)
+    .style('filter', 'drop-shadow(0 1px 3px rgba(14,19,54,0.06))')
+    .on('mousemove', (ev, d) => showTooltip(ev, d))
+    .on('mouseleave', hideTooltip)
+    .on('mouseenter', function() { d3.select(this).classed('is-hover', true); })
+    .on('mouseout',   function() { d3.select(this).classed('is-hover', false); });
+
+  barEnter.merge(barSel)
+    .transition()
+      .duration(820).ease(d3.easeBackOut.overshoot(0.5))
+      .delay((d, i) => firstRender ? 700 + i * 50 : i * 30)
+    .attr('y', d => y(d.id))
+    .attr('height', y.bandwidth())
+    .attr('x', 0)
+    .attr('width', d => Math.max(0, x(magOf(d))))
+    .attr('fill', d => colorForPct(d.pct))
+    .style('opacity', 1);
+
+  // ---- Project labels ----
+  const lblSel = root.select('g.bb-row-lbls').selectAll('text.bb-row-lbl').data(rows, d => d.id);
+  lblSel.exit().transition().duration(220).style('opacity', 0).remove();
+  lblSel.enter().append('text')
+    .attr('class', 'bb-row-lbl')
+    .attr('text-anchor', 'end')
+    .attr('x', -10)
+    .attr('y', d => y(d.id) + y.bandwidth() / 2 + 4)
+    .text(d => d.name)
+    .style('opacity', 0)
+    .merge(lblSel)
+    .text(d => d.name)
+    .transition().duration(540).ease(d3.easeCubicOut)
+      .delay((d, i) => firstRender ? 550 + i * 50 : i * 30)
+    .attr('y', d => y(d.id) + y.bandwidth() / 2 + 4)
+    .style('opacity', 1);
+
+  // ---- Value labels — single text per row, with optional secondary tspan ----
+  const valSel = root.select('g.bb-row-vals').selectAll('text.bb-row-val').data(rows, d => d.id);
+  valSel.exit().transition().duration(220).style('opacity', 0).remove();
+  const valEnter = valSel.enter().append('text')
+    .attr('class', 'bb-row-val bb-row-val-primary')
+    .attr('text-anchor', 'start')
+    .attr('y', d => y(d.id) + y.bandwidth() / 2 + 4)
+    .style('opacity', 0);
+
+  const valMerged = valEnter.merge(valSel)
+    .attr('fill', d => labelColorForPct(d.pct));
+
+  // Rebuild content : clear EVERYTHING (text + tspans) before re-adding
+  valMerged.each(function(d) {
+    const node = this;
+    while (node.firstChild) node.removeChild(node.firstChild);
+    const t = d3.select(node);
+    const primaryFill = labelColorForPct(d.pct);
+    if (STATE.metric === 'abs') {
+      t.append('tspan')
+        .attr('fill', primaryFill)
+        .text(fmtSign(d.delta) + ' ' + CONFIG.unit);
+      t.append('tspan')
+        .attr('class', 'bb-row-val-secondary')
+        .attr('fill', 'var(--bb-muted)')
+        .style('font-size', '10.5px')
+        .style('font-weight', '500')
+        .text(' · ' + fmtPct(d.pct));
+    } else {
+      t.append('tspan').attr('fill', primaryFill).text(fmtPct(d.pct));
+    }
+  });
+
+  valMerged
+    .transition().duration(540).ease(d3.easeCubicOut)
+      .delay((d, i) => firstRender ? 900 + i * 50 : 220 + i * 30)
+    .attr('x', d => x(magOf(d)) + 8)
+    .attr('y', d => y(d.id) + y.bandwidth() / 2 + 4)
+    .style('opacity', 1);
+
+  renderPanel(rows);
+
+  // Shine sweep on bars area, on first render only
+  if (firstRender) {
+    const lastBarDelay = 700 + (rows.length - 1) * 50 + 820;
+    setTimeout(() => addShineSweep(innerW, innerH), lastBarDelay - 50);
+  }
+  firstRender = false;
+}
+
+function renderPager(totalPages) {
+  const pager = document.getElementById('pager');
+  const showPager = STATE.n === 'all' && totalPages > 1;
+  pager.classList.toggle('is-shown', showPager);
+  if (!showPager) return;
+  document.getElementById('pg-info').textContent = `${STATE.page + 1} / ${totalPages}`;
+  document.getElementById('pg-prev').disabled = STATE.page === 0;
+  document.getElementById('pg-next').disabled = STATE.page >= totalPages - 1;
+}
+
+function addShineSweep(innerW, innerH) {
+  const root = svg.select('g.bb-root-g');
+  if (root.empty()) return;
+  // Remove any previous shine
+  root.selectAll('rect.bb-shine').remove();
+
+  const shineW = 130;
+  const shine = root.append('rect')
+    .attr('class', 'bb-shine')
+    .attr('y', 0).attr('height', innerH)
+    .attr('width', shineW)
+    .attr('x', -shineW)
+    .attr('fill', 'url(#bb-shine-grad)')
+    .style('opacity', 0);
+
+  shine.transition()
+    .duration(120)
+    .style('opacity', 1)
+    .transition()
+    .duration(900)
+    .ease(d3.easeQuadInOut)
+    .attr('x', innerW)
+    .transition()
+    .duration(180)
+    .style('opacity', 0)
+    .on('end', function() { d3.select(this).remove(); });
+}
+
+/* ----- Panel ----- */
+function renderPanel(rowsShown) {
+  const data = effectiveData();
+  const total = data.length;
+  const overClass  = CONFIG.overIsBad ? 'neg' : 'pos';
+  const underClass = CONFIG.overIsBad ? 'pos' : 'neg';
+
+  const panel = d3.select('#panel');
+  panel.html('');
+  panel.append('div').attr('class', 'bb-pn-head').text('Synthèse portefeuille');
+  const blocks = panel.append('div').attr('class', 'bb-pn-blocks');
+
+  if (total === 0) {
+    const empty = blocks.append('div').attr('class', 'bb-pn-blk');
+    empty.append('div').attr('class', 'bb-pn-total').text('0');
+    empty.append('div').attr('class', 'bb-pn-total-lbl')
+      .text(STATE.search ? 'Aucun projet ne correspond' : 'Aucun projet');
+    return;
+  }
+
+  const totalDelta = d3.sum(data, d => d.delta);
+  const totalM1    = d3.sum(data, d => d.m1);
+  const totalDeltaPct = totalM1 > 0 ? (totalDelta / totalM1) * 100 : 0;
+  const worst = data.slice().sort((a, b) => b.delta - a.delta)[0];
+  const best  = data.slice().sort((a, b) => a.delta - b.delta)[0];
+
+  // Block 1 — Total projects (big number, top)
+  const b1 = blocks.append('div').attr('class', 'bb-pn-blk');
+  b1.append('div').attr('class', 'bb-pn-total').text(total);
+  b1.append('div').attr('class', 'bb-pn-total-lbl')
+    .text((total > 1 ? CONFIG.itemPlural : CONFIG.itemSingular) + ' dans le scope' +
+          (STATE.search ? ' (filtrés)' : ''));
+
+  // Block 2 — Distribution
+  const b2 = blocks.append('div').attr('class', 'bb-pn-blk');
+  b2.append('div').attr('class', 'bb-pn-lbl').text('Distribution des écarts');
+  renderDistribution(b2, data);
+
+  // Block 3 — Écart global
+  const totalCls = totalDelta >= 0 ? overClass : underClass;
+  const b3 = blocks.append('div').attr('class', 'bb-pn-blk');
+  b3.append('div').attr('class', 'bb-pn-lbl').text('Écart global');
+  b3.append('div').attr('class', 'bb-pn-val ' + totalCls)
+    .text(fmtSign(totalDelta) + ' ' + CONFIG.unit);
+  b3.append('div').attr('class', 'bb-pn-sub')
+    .html(`<strong>${fmtPct(totalDeltaPct)}</strong> du ${CONFIG.m1.toLowerCase()} cumulé`);
+
+  // Block 4 — Dépassement max
+  const b4 = blocks.append('div').attr('class', 'bb-pn-blk');
+  b4.append('div').attr('class', 'bb-pn-lbl').text(cap1(CONFIG.overTerm) + ' maximum');
+  b4.append('div').attr('class', 'bb-pn-val-name')
+    .text(worst.name)
+    .on('click', () => flashOrJumpToItem(worst));
+  b4.append('div').attr('class', 'bb-pn-tag ' + overClass)
+    .text(`${fmtSign(worst.delta)} ${CONFIG.unit} · ${fmtPct(worst.pct)}`);
+
+  // Block 5 — Retard max
+  const b5 = blocks.append('div').attr('class', 'bb-pn-blk');
+  b5.append('div').attr('class', 'bb-pn-lbl').text(cap1(CONFIG.underTerm) + ' maximum');
+  b5.append('div').attr('class', 'bb-pn-val-name')
+    .text(best.name)
+    .on('click', () => flashOrJumpToItem(best));
+  b5.append('div').attr('class', 'bb-pn-tag ' + underClass)
+    .text(`${fmtSign(best.delta)} ${CONFIG.unit} · ${fmtPct(best.pct)}`);
+}
+
+function cap1(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function renderDistribution(parent, data) {
+  data = data || effectiveData();
+  // 5 bins: < -20, -20 to -5, ±5, 5 to 20, > 20
+  const bins = [
+    { min: -Infinity, max: -20, side: 'under', deep: true  },
+    { min: -20,       max: -5,  side: 'under', deep: false },
+    { min: -5,        max:  5,  side: 'tol',   deep: false },
+    { min:  5,        max:  20, side: 'over',  deep: false },
+    { min:  20,       max: Infinity, side: 'over', deep: true }
+  ];
+  bins.forEach(b => b.count = data.filter(d => d.pct >= b.min && d.pct < b.max).length);
+
+  const total = data.length;
+  const overFill  = CONFIG.overIsBad ? 'var(--bb-neg)' : 'var(--bb-pos)';
+  const underFill = CONFIG.overIsBad ? 'var(--bb-pos)' : 'var(--bb-neg)';
+  const overSoft  = CONFIG.overIsBad ? 'var(--bb-neg-soft)' : 'var(--bb-pos-soft)';
+  const underSoft = CONFIG.overIsBad ? 'var(--bb-pos-soft)' : 'var(--bb-neg-soft)';
+
+  const colorOf = (b) =>
+      b.side === 'over'  ? (b.deep ? overFill  : overSoft)
+    : b.side === 'under' ? (b.deep ? underFill : underSoft)
+                         : 'var(--bb-zone-soft)';
+
+  const rangeLabel = (b) => {
+    if (b.max === Infinity)  return `Plus de +${b.min}% de ${CONFIG.overTerm}`;
+    if (b.min === -Infinity) return `Plus de ${Math.abs(b.max)}% de ${CONFIG.underTerm}`;
+    if (b.side === 'tol')    return `Sur cible (entre ${b.min}% et +${b.max}%)`;
+    if (b.side === 'over')   return `${cap1(CONFIG.overTerm)} de +${b.min}% à +${b.max}%`;
+    return `${cap1(CONFIG.underTerm)} de ${Math.abs(b.max)}% à ${Math.abs(b.min)}%`;
+  };
+
+  const wrapDiv = parent.append('div').attr('class', 'bb-pn-dist');
+
+  // Horizontal proportional band — segments widths proportional to bin counts.
+  // The whole band represents 100% of the portfolio.
+  const W = 192, H = 22, R = 4;
+  const svgD = wrapDiv.append('svg')
+    .attr('class', 'bb-pn-dist-band')
+    .attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('preserveAspectRatio', 'none');
+
+  // Empty placeholder background
+  svgD.append('rect')
+    .attr('x', 0).attr('y', 0)
+    .attr('width', W).attr('height', H)
+    .attr('rx', R).attr('ry', R)
+    .attr('fill', 'var(--bb-grid)');
+
+  if (total === 0) return;
+
+  // ClipPath for rounded corners on the segment group
+  const clipId = 'bb-dist-clip-' + Math.random().toString(36).slice(2, 8);
+  svgD.append('defs').append('clipPath').attr('id', clipId)
+    .append('rect').attr('x', 0).attr('y', 0).attr('width', W).attr('height', H)
+    .attr('rx', R).attr('ry', R);
+
+  const segG = svgD.append('g').attr('clip-path', `url(#${clipId})`);
+
+  // Compute cumulative widths
+  let xCum = 0;
+  bins.forEach((b, i) => {
+    const w = (b.count / total) * W;
+    if (b.count === 0) { return; }
+
+    const seg = segG.append('rect')
+      .attr('class', 'bb-dist-seg')
+      .attr('y', 0).attr('height', H)
+      .attr('x', xCum).attr('width', 0)
+      .attr('fill', colorOf(b))
+      .style('cursor', 'pointer')
+      .on('mousemove', (ev) => showDistTooltip(ev, b, rangeLabel(b)))
+      .on('mouseleave', hideTooltip);
+
+    seg.transition().duration(620).ease(d3.easeCubicOut).delay(700 + i * 70)
+      .attr('width', w);
+
+    xCum += w;
+  });
+
+  // Vertical white separators between non-empty segments
+  let xCum2 = 0;
+  bins.forEach((b, i) => {
+    const w = (b.count / total) * W;
+    if (b.count === 0) return;
+    if (xCum2 > 0) {
+      segG.append('line')
+        .attr('class', 'bb-dist-tick')
+        .attr('x1', xCum2).attr('x2', xCum2)
+        .attr('y1', 0).attr('y2', H)
+        .style('opacity', 0)
+        .transition().duration(300).delay(1000 + i * 70)
+        .style('opacity', 1);
+    }
+    xCum2 += w;
+  });
+
+  // Axis labels — 3 lignes avec dots colorées
+  const overCount  = bins.filter(b => b.side === 'over').reduce((a, b) => a + b.count, 0);
+  const tolCount   = bins.filter(b => b.side === 'tol' ).reduce((a, b) => a + b.count, 0);
+  const underCount = bins.filter(b => b.side === 'under').reduce((a, b) => a + b.count, 0);
+
+  const axis = wrapDiv.append('div').attr('class', 'bb-pn-dist-axis');
+  axis.append('div').attr('class', 'bb-pn-dist-row')
+    .html(`<span class="bb-pn-dist-dot" style="background:${underFill}"></span><strong>${underCount}</strong> ${CONFIG.underTermPlural}`);
+  axis.append('div').attr('class', 'bb-pn-dist-row')
+    .html(`<span class="bb-pn-dist-dot is-tol"></span><strong>${tolCount}</strong> sur cible`);
+  axis.append('div').attr('class', 'bb-pn-dist-row')
+    .html(`<span class="bb-pn-dist-dot" style="background:${overFill}"></span><strong>${overCount}</strong> ${CONFIG.overTermPlural}`);
+}
+
+/* ----- Tooltip for distribution band — reuses .bb-tt ----- */
+function showDistTooltip(ev, b, range) {
+  const isOver = b.side === 'over';
+  const isUnder = b.side === 'under';
+  const cls = isOver ? colorClass(1) : isUnder ? colorClass(-1) : '';
+  const total = effectiveData().length;
+  const html = `
+    <div class="bb-tt-title">${range}</div>
+    <div class="bb-tt-row">
+      <span class="k">Projets concernés</span>
+      <span class="v">${b.count} / ${total}</span>
+    </div>
+    <div class="bb-tt-row">
+      <span class="k">Part du portefeuille</span>
+      <span class="v"><span class="bb-tt-delta ${cls}">${total > 0 ? d3.format('.0f')((b.count / total) * 100) : 0}%</span></span>
+    </div>`;
+  tt.html(html);
+
+  const frameEl = document.getElementById('frame');
+  const fRect = frameEl.getBoundingClientRect();
+  const x = ev.clientX - fRect.left;
+  const y = ev.clientY - fRect.top;
+  const flipBelow = y < 170;
+  tt.classed('is-below', flipBelow);
+  tt.style('left', x + 'px').style('top', y + 'px').classed('is-on', true);
+}
+
+/* ----- Flash a row in the chart (called from panel click) ----- */
+function flashOrJumpToItem(item) {
+  const visibleIds = filterAndSort().rows.map(d => d.id);
+  if (!visibleIds.includes(item.id)) {
+    STATE.mode = 'all';
+    STATE.page = 0;
+    if (STATE.n !== 'all') STATE.n = 'auto';
+    rebuildDrops();
+    render();
+    setTimeout(() => flashBar(item.id), 1500);
+  } else {
+    flashBar(item.id);
+  }
+}
+function flashBar(id) {
+  const bar = svg.select(`rect.bb-bar[data-id="${id}"]`);
+  if (bar.empty()) return;
+  bar.classed('is-flash', false);
+  void bar.node().offsetWidth;
+  bar.classed('is-flash', true);
+  setTimeout(() => bar.classed('is-flash', false), 1300);
+}
+
+/* ----- Tooltip with auto flip + escape clipping ----- */
+function showTooltip(ev, d) {
+  const cls = colorClass(d.pct);
+  const html = `
+    <div class="bb-tt-title">${d.name}</div>
+    <div class="bb-tt-row">
+      <span class="k">${CONFIG.m1}</span>
+      <span class="v">${fmt(d.m1)} ${CONFIG.unit}</span>
+    </div>
+    <div class="bb-tt-row">
+      <span class="k">${CONFIG.m2}</span>
+      <span class="v">${fmt(d.m2)} ${CONFIG.unit}</span>
+    </div>
+    <div class="bb-tt-divider"></div>
+    <div class="bb-tt-row">
+      <span class="k">Écart</span>
+      <span class="v"><span class="bb-tt-delta ${cls}">${fmtSign(d.delta)} ${CONFIG.unit}</span></span>
+    </div>
+    <div class="bb-tt-row">
+      <span class="k">Variation</span>
+      <span class="v"><span class="bb-tt-delta ${cls}">${fmtPct(d.pct)}</span></span>
+    </div>`;
+  tt.html(html);
+
+  // tooltip is appended to .frame, so coords relative to .frame
+  const frameEl = document.getElementById('frame');
+  const fRect = frameEl.getBoundingClientRect();
+  const x = ev.clientX - fRect.left;
+  const y = ev.clientY - fRect.top;
+
+  // Decide flip: if cursor too close to top of frame, flip below
+  const flipBelow = y < 170;
+  tt.classed('is-below', flipBelow);
+
+  tt.style('left', x + 'px').style('top', y + 'px').classed('is-on', true);
+}
+function hideTooltip() { tt.classed('is-on', false); }
+
+document.getElementById('chart').addEventListener('mouseleave', hideTooltip);
+document.getElementById('pg-prev').addEventListener('click', () => {
+  if (STATE.page > 0) { STATE.page--; render(); }
+});
+document.getElementById('pg-next').addEventListener('click', () => {
+  STATE.page++; render();
+});
+
+/* Search wiring */
+const searchEl   = document.getElementById('search-input');
+const searchWrap = document.getElementById('search-wrap');
+const searchClr  = document.getElementById('search-clear');
+searchEl.addEventListener('input', () => {
+  const wasEmpty = STATE.search === '';
+  STATE.search = searchEl.value.trim();
+  STATE.page = 0;
+  // When the user starts searching, switch to "Tous classés" automatically
+  if (wasEmpty && STATE.search) {
+    STATE.mode = 'all';
+    STATE.n   = 'all';
+  }
+  searchWrap.classList.toggle('has-value', !!STATE.search);
+  rebuildDrops();
+  render();
+});
+searchEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && STATE.search) {
+    e.preventDefault();
+    searchEl.value = '';
+    STATE.search = '';
+    STATE.page = 0;
+    searchWrap.classList.remove('has-value');
+    render();
+  }
+});
+searchClr.addEventListener('click', () => {
+  searchEl.value = '';
+  STATE.search = '';
+  STATE.page = 0;
+  searchWrap.classList.remove('has-value');
+  render();
+  searchEl.focus();
+});
+
+window.addEventListener('resize', () => render());
+
+rebuildDrops();
+render();
+</script>
+</body>
+</html>

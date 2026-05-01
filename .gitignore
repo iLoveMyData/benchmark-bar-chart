@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build output (the .pbiviz is published via GitHub Releases instead)
+dist/
+.tmp/
+webpack.statistics.prod.html
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Backups
+*.pbiviz.json.bak
+
+# Lockfiles (npm) — kept out of source to avoid platform-specific noise
+package-lock.json
+
+# Temporary build/migration scripts (one-shot helpers)
+.tmp_*.js

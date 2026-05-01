@@ -1,0 +1,380 @@
+{
+    "dataRoles": [
+        {
+            "name": "category",
+            "kind": "Grouping",
+            "displayName": "Category",
+            "displayNameKey": "Role_Category"
+        },
+        {
+            "name": "measure1",
+            "kind": "Measure",
+            "displayName": "Reference",
+            "displayNameKey": "Role_M1",
+            "requiredTypes": [{ "numeric": true }, { "integer": true }]
+        },
+        {
+            "name": "measure2",
+            "kind": "Measure",
+            "displayName": "Actual",
+            "displayNameKey": "Role_M2",
+            "requiredTypes": [{ "numeric": true }, { "integer": true }]
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "category": { "max": 1 },
+                    "measure1": { "max": 1 },
+                    "measure2": { "max": 1 }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "for": { "in": "category" },
+                    "dataReductionAlgorithm": { "top": { "count": 5000 } }
+                },
+                "values": {
+                    "select": [
+                        { "bind": { "to": "measure1" } },
+                        { "bind": { "to": "measure2" } }
+                    ]
+                }
+            }
+        }
+    ],
+    "objects": {
+        "general": {
+            "displayName": "General",
+            "displayNameKey": "Obj_General",
+            "properties": {
+                "localeOverride": { "displayName": "Visual language", "displayNameKey": "Prop_LocaleOverride", "type": { "enumeration": [
+                    { "value": "auto",  "displayName": "Auto (host)", "displayNameKey": "Lang_Auto" },
+                    { "value": "en-US", "displayName": "English",     "displayNameKey": "Lang_EN"   },
+                    { "value": "fr-FR", "displayName": "Français",    "displayNameKey": "Lang_FR"   },
+                    { "value": "es-ES", "displayName": "Español",     "displayNameKey": "Lang_ES"   },
+                    { "value": "de-DE", "displayName": "Deutsch",     "displayNameKey": "Lang_DE"   },
+                    { "value": "it-IT", "displayName": "Italiano",    "displayNameKey": "Lang_IT"   },
+                    { "value": "pt-BR", "displayName": "Português",   "displayNameKey": "Lang_PT"   },
+                    { "value": "zh-CN", "displayName": "中文 (简体)",  "displayNameKey": "Lang_ZH"   }
+                ]}}
+            }
+        },
+        "title": {
+            "displayName": "Title",
+            "displayNameKey": "Obj_Title",
+            "properties": {
+                "show":          { "displayName": "Show",          "displayNameKey": "Prop_Show",          "type": { "bool": true } },
+                "text":          { "displayName": "Text",          "displayNameKey": "Prop_Text",          "type": { "text": true } },
+                "color":         { "displayName": "Color",         "displayNameKey": "Prop_Color",         "type": { "fill": { "solid": { "color": true } } } },
+                "fontFamily":    { "displayName": "Font",          "displayNameKey": "Prop_FontFamily",    "type": { "formatting": { "fontFamily": true } } },
+                "fontSize":      { "displayName": "Font size",     "displayNameKey": "Prop_FontSize",      "type": { "formatting": { "fontSize": true } } },
+                "fontBold":      { "displayName": "Bold",          "displayNameKey": "Prop_Bold",          "type": { "bool": true } },
+                "fontItalic":    { "displayName": "Italic",        "displayNameKey": "Prop_Italic",        "type": { "bool": true } },
+                "fontUnderline": { "displayName": "Underline",     "displayNameKey": "Prop_Underline",     "type": { "bool": true } },
+                "align":         { "displayName": "Alignment",     "displayNameKey": "Prop_Align",         "type": { "enumeration": [
+                    { "value": "left",   "displayName": "Left",   "displayNameKey": "Align_Left" },
+                    { "value": "center", "displayName": "Center", "displayNameKey": "Align_Center" },
+                    { "value": "right",  "displayName": "Right",  "displayNameKey": "Align_Right" }
+                ]}}
+            }
+        },
+        "labels": {
+            "displayName": "Bar value labels",
+            "displayNameKey": "Obj_Labels",
+            "properties": {
+                "show":         { "displayName": "Show",        "displayNameKey": "Prop_Show",        "type": { "bool": true } },
+                "color":        { "displayName": "Neutral color (on target)", "displayNameKey": "Prop_LabelNeutralColor", "type": { "fill": { "solid": { "color": true } } } },
+                "fontFamily":   { "displayName": "Font",        "displayNameKey": "Prop_FontFamily",  "type": { "formatting": { "fontFamily": true } } },
+                "fontSize":     { "displayName": "Font size",   "displayNameKey": "Prop_FontSize",    "type": { "formatting": { "fontSize": true } } },
+                "fontBold":     { "displayName": "Bold",        "displayNameKey": "Prop_Bold",        "type": { "bool": true } },
+                "fontItalic":   { "displayName": "Italic",      "displayNameKey": "Prop_Italic",      "type": { "bool": true } },
+                "position":     { "displayName": "Position",    "displayNameKey": "Prop_LabelPosition", "type": { "enumeration": [
+                    { "value": "auto", "displayName": "Auto",          "displayNameKey": "LabelPos_Auto" },
+                    { "value": "end",  "displayName": "End of bar",    "displayNameKey": "LabelPos_End"  }
+                ]}},
+                "colorMode":      { "displayName": "Color mode",       "displayNameKey": "Prop_LabelColorMode", "type": { "enumeration": [
+                    { "value": "inheritFromBar", "displayName": "Inherit from bar", "displayNameKey": "LblColorMode_Inherit" },
+                    { "value": "manual",         "displayName": "Manual (per zone)","displayNameKey": "LblColorMode_Manual"  }
+                ]}},
+                "colorDeepUnder": { "displayName": "Deep under (label)",   "displayNameKey": "Prop_LabelColorDeepUnder", "type": { "fill": { "solid": { "color": true } } } },
+                "colorSoftUnder": { "displayName": "Soft under (label)",   "displayNameKey": "Prop_LabelColorSoftUnder", "type": { "fill": { "solid": { "color": true } } } },
+                "colorTolerance": { "displayName": "On target (label)",    "displayNameKey": "Prop_LabelColorTolerance", "type": { "fill": { "solid": { "color": true } } } },
+                "colorSoftOver":  { "displayName": "Soft over (label)",    "displayNameKey": "Prop_LabelColorSoftOver",  "type": { "fill": { "solid": { "color": true } } } },
+                "colorDeepOver":  { "displayName": "Deep over (label)",    "displayNameKey": "Prop_LabelColorDeepOver",  "type": { "fill": { "solid": { "color": true } } } }
+            }
+        },
+        "bars": {
+            "displayName": "Bars",
+            "displayNameKey": "Obj_Bars",
+            "properties": {
+                "barRadius":   { "displayName": "Corner radius (px)", "displayNameKey": "Prop_BarRadius",   "type": { "numeric": true } },
+                "barOpacity":  { "displayName": "Opacity (0-1)",      "displayNameKey": "Prop_BarOpacity",  "type": { "numeric": true } },
+                "barShadow":   { "displayName": "Drop shadow",        "displayNameKey": "Prop_BarShadow",   "type": { "bool": true } },
+                "barHeightMode": { "displayName": "Height mode",      "displayNameKey": "Prop_BarHeightMode", "type": { "enumeration": [
+                    { "value": "auto",  "displayName": "Auto",  "displayNameKey": "BarH_Auto"  },
+                    { "value": "fixed", "displayName": "Fixed", "displayNameKey": "BarH_Fixed" }
+                ]}},
+                "barHeightFixed": { "displayName": "Fixed height (px)", "displayNameKey": "Prop_BarHeightFixed", "type": { "numeric": true } }
+            }
+        },
+        "zoneColors": {
+            "displayName": "Zone colors",
+            "displayNameKey": "Obj_ZoneColors",
+            "properties": {
+                "colorDeepUnder":  { "displayName": "Deep under target",   "displayNameKey": "Prop_ColorDeepUnder",  "type": { "fill": { "solid": { "color": true } } } },
+                "colorSoftUnder":  { "displayName": "Soft under target",   "displayNameKey": "Prop_ColorSoftUnder",  "type": { "fill": { "solid": { "color": true } } } },
+                "colorTolerance":  { "displayName": "On target (tolerance)","displayNameKey": "Prop_ColorTolerance", "type": { "fill": { "solid": { "color": true } } } },
+                "colorSoftOver":   { "displayName": "Soft over target",    "displayNameKey": "Prop_ColorSoftOver",   "type": { "fill": { "solid": { "color": true } } } },
+                "colorDeepOver":   { "displayName": "Deep over target",    "displayNameKey": "Prop_ColorDeepOver",   "type": { "fill": { "solid": { "color": true } } } }
+            }
+        },
+        "decomposition": {
+            "displayName": "Decomposition (zones)",
+            "displayNameKey": "Obj_Decomposition",
+            "properties": {
+                "thresholdSoft":     { "displayName": "Soft threshold (%)", "displayNameKey": "Prop_DecompThresholdSoft", "type": { "numeric": true } },
+                "thresholdDeep":     { "displayName": "Deep threshold (%)", "displayNameKey": "Prop_DecompThresholdDeep", "type": { "numeric": true } },
+                "tolerance":         { "displayName": "Tolerance threshold (%)", "displayNameKey": "Prop_DecompTolerance", "type": { "numeric": true } },
+                "tolerancePolicy":   { "displayName": "Tolerance policy", "displayNameKey": "Prop_DecompTolPolicy", "type": { "enumeration": [
+                    { "value": "soft",   "displayName": "Use soft threshold",     "displayNameKey": "TolPolicy_Soft"   },
+                    { "value": "custom", "displayName": "Use custom tolerance",   "displayNameKey": "TolPolicy_Custom" }
+                ]}}
+            }
+        },
+        "axis": {
+            "displayName": "Items axis",
+            "displayNameKey": "Obj_Axis",
+            "properties": {
+                "show":         { "displayName": "Show",                   "displayNameKey": "Prop_Show",          "type": { "bool": true } },
+                "color":        { "displayName": "Color",                  "displayNameKey": "Prop_Color",         "type": { "fill": { "solid": { "color": true } } } },
+                "fontFamily":   { "displayName": "Font",                   "displayNameKey": "Prop_FontFamily",    "type": { "formatting": { "fontFamily": true } } },
+                "fontSize":     { "displayName": "Font size",              "displayNameKey": "Prop_FontSize",      "type": { "formatting": { "fontSize": true } } },
+                "fontBold":     { "displayName": "Bold",                   "displayNameKey": "Prop_Bold",          "type": { "bool": true } },
+                "fontItalic":   { "displayName": "Italic",                 "displayNameKey": "Prop_Italic",        "type": { "bool": true } },
+                "overflow":     { "displayName": "When too long",          "displayNameKey": "Prop_AxisOverflow",  "type": { "enumeration": [
+                    { "value": "ellipsis", "displayName": "Ellipsis",        "displayNameKey": "AxisOv_Ellipsis" },
+                    { "value": "wrap",     "displayName": "Wrap on words",   "displayNameKey": "AxisOv_Wrap"     },
+                    { "value": "shrink",   "displayName": "Auto-shrink font","displayNameKey": "AxisOv_Shrink"   }
+                ]}},
+                "maxWidthPct":  { "displayName": "Max width (% of chart)", "displayNameKey": "Prop_AxisMaxWidthPct","type": { "numeric": true } },
+                "minFontSize":  { "displayName": "Min font (when shrink)", "displayNameKey": "Prop_AxisMinFont",   "type": { "numeric": true } }
+            }
+        },
+        "semantics": {
+            "displayName": "Semantics",
+            "displayNameKey": "Obj_Semantics",
+            "properties": {
+                "overIsBad":          { "displayName": "Over is negative",   "displayNameKey": "Prop_OverIsBad",          "type": { "bool": true } },
+                "overTermSingular":   { "displayName": "Over (singular)",    "displayNameKey": "Prop_OverTermSingular",   "type": { "text": true } },
+                "overTermPlural":     { "displayName": "Over (plural)",      "displayNameKey": "Prop_OverTermPlural",     "type": { "text": true } },
+                "underTermSingular":  { "displayName": "Under (singular)",   "displayNameKey": "Prop_UnderTermSingular",  "type": { "text": true } },
+                "underTermPlural":    { "displayName": "Under (plural)",     "displayNameKey": "Prop_UnderTermPlural",    "type": { "text": true } }
+            }
+        },
+        "tooltipStyle": {
+            "displayName": "Tooltip",
+            "displayNameKey": "Obj_TooltipStyle",
+            "properties": {
+                "bg":         { "displayName": "Background",     "displayNameKey": "Prop_TtBg",         "type": { "fill": { "solid": { "color": true } } } },
+                "text":       { "displayName": "Text color",     "displayNameKey": "Prop_TtText",       "type": { "fill": { "solid": { "color": true } } } },
+                "fontFamily": { "displayName": "Font",           "displayNameKey": "Prop_FontFamily",   "type": { "formatting": { "fontFamily": true } } },
+                "size":       { "displayName": "Font size",      "displayNameKey": "Prop_FontSize",     "type": { "formatting": { "fontSize": true } } },
+                "bold":       { "displayName": "Bold",           "displayNameKey": "Prop_Bold",         "type": { "bool": true } },
+                "italic":     { "displayName": "Italic",         "displayNameKey": "Prop_Italic",       "type": { "bool": true } },
+                "radius":     { "displayName": "Corner radius",  "displayNameKey": "Prop_TtRadius",     "type": { "numeric": true } },
+                "m1Label":    { "displayName": "Reference label override", "displayNameKey": "Prop_TtM1Label", "type": { "text": true } },
+                "m2Label":    { "displayName": "Actual label override",    "displayNameKey": "Prop_TtM2Label", "type": { "text": true } }
+            }
+        },
+        "panel": {
+            "displayName": "Side panel",
+            "displayNameKey": "Obj_Panel",
+            "properties": {
+                "show":              { "displayName": "Show panel",            "displayNameKey": "Prop_Show",              "type": { "bool": true } },
+                "headText":          { "displayName": "Heading text",          "displayNameKey": "Prop_PanelHeadText",     "type": { "text": true } },
+                "headColor":         { "displayName": "Heading color",         "displayNameKey": "Prop_PanelHeadColor",    "type": { "fill": { "solid": { "color": true } } } },
+                "headSize":          { "displayName": "Heading size",          "displayNameKey": "Prop_PanelHeadSize",     "type": { "formatting": { "fontSize": true } } },
+                "totalSize":         { "displayName": "Total size",            "displayNameKey": "Prop_PanelTotalSize",    "type": { "formatting": { "fontSize": true } } },
+                "totalLblText":      { "displayName": "Total label override",  "displayNameKey": "Prop_PanelTotalLblText", "type": { "text": true } },
+                "distributionShow":  { "displayName": "Show distribution",     "displayNameKey": "Prop_PanelDistShow",     "type": { "bool": true } },
+                "distributionLblText": { "displayName": "Distribution label",  "displayNameKey": "Prop_PanelDistLbl",      "type": { "text": true } },
+                "ecartGlobalLblText":  { "displayName": "Global gap label",    "displayNameKey": "Prop_PanelEcartLbl",     "type": { "text": true } },
+                "depMaxLblText":     { "displayName": "Max over label",        "displayNameKey": "Prop_PanelDepMaxLbl",    "type": { "text": true } },
+                "retardMaxLblText":  { "displayName": "Max under label",       "displayNameKey": "Prop_PanelRetardMaxLbl", "type": { "text": true } },
+                "separatorColor":    { "displayName": "Separator color",       "displayNameKey": "Prop_PanelSepColor",     "type": { "fill": { "solid": { "color": true } } } },
+                "valColor":          { "displayName": "Value color",           "displayNameKey": "Prop_PanelValColor",     "type": { "fill": { "solid": { "color": true } } } },
+                "lblColor":          { "displayName": "Label color",           "displayNameKey": "Prop_PanelLblColor",     "type": { "fill": { "solid": { "color": true } } } },
+                "lblSize":           { "displayName": "Label size",            "displayNameKey": "Prop_PanelLblSize",      "type": { "formatting": { "fontSize": true } } },
+                "valSize":           { "displayName": "Value size",            "displayNameKey": "Prop_PanelValSize",      "type": { "formatting": { "fontSize": true } } },
+                "fontFamily":        { "displayName": "Font",                  "displayNameKey": "Prop_FontFamily",        "type": { "formatting": { "fontFamily": true } } },
+                "widthPx":           { "displayName": "Width (px)",            "displayNameKey": "Prop_PanelWidth",        "type": { "numeric": true } },
+                "showDepMax":        { "displayName": "Show 'max over' block", "displayNameKey": "Prop_PanelShowDepMax",   "type": { "bool": true } },
+                "showRetardMax":     { "displayName": "Show 'max under' block","displayNameKey": "Prop_PanelShowRetardMax","type": { "bool": true } },
+                "showTotal":         { "displayName": "Show total block",       "displayNameKey": "Prop_PanelShowTotal",    "type": { "bool": true } },
+                "showEcartGlobal":   { "displayName": "Show global gap block",  "displayNameKey": "Prop_PanelShowEcart",    "type": { "bool": true } },
+                "bgColor":           { "displayName": "Panel background",       "displayNameKey": "Prop_PanelBg",           "type": { "fill": { "solid": { "color": true } } } },
+                "namesColor":        { "displayName": "Max names color",        "displayNameKey": "Prop_PanelNamesColor",   "type": { "fill": { "solid": { "color": true } } } },
+                "tagBgOpacity":      { "displayName": "Max tag bg opacity",     "displayNameKey": "Prop_PanelTagBgOpacity", "type": { "numeric": true } },
+                "bandHeight":        { "displayName": "Distribution band height (px)", "displayNameKey": "Prop_PanelBandHeight", "type": { "numeric": true } },
+                "axisRetardsLabel":  { "displayName": "Distribution: under label", "displayNameKey": "Prop_PanelAxisRetards", "type": { "text": true } },
+                "axisOnTargetLabel": { "displayName": "Distribution: on-target label", "displayNameKey": "Prop_PanelAxisTol", "type": { "text": true } },
+                "axisDepLabel":      { "displayName": "Distribution: over label", "displayNameKey": "Prop_PanelAxisDep", "type": { "text": true } },
+                "distributionTickWidth": { "displayName": "Distribution separator width (px)", "displayNameKey": "Prop_PanelDistTickWidth", "type": { "numeric": true } }
+            }
+        },
+        "controls": {
+            "displayName": "Controls",
+            "displayNameKey": "Obj_Controls",
+            "properties": {
+                "controlsBg":             { "displayName": "Background (neutral)",     "displayNameKey": "Prop_CtrlBg",            "type": { "fill": { "solid": { "color": true } } } },
+                "controlsBorder":         { "displayName": "Border (neutral)",         "displayNameKey": "Prop_CtrlBorder",        "type": { "fill": { "solid": { "color": true } } } },
+                "controlsBorderWidth":    { "displayName": "Border width",             "displayNameKey": "Prop_CtrlBorderWidth",   "type": { "numeric": true } },
+                "controlsText":           { "displayName": "Text (neutral)",           "displayNameKey": "Prop_CtrlText",          "type": { "fill": { "solid": { "color": true } } } },
+                "controlsRadius":         { "displayName": "Corner radius",            "displayNameKey": "Prop_CtrlRadius",        "type": { "numeric": true } },
+                "controlsHover":          { "displayName": "Background (hover)",       "displayNameKey": "Prop_CtrlHover",         "type": { "fill": { "solid": { "color": true } } } },
+                "controlsHoverBorder":    { "displayName": "Border (hover)",           "displayNameKey": "Prop_CtrlHoverBorder",   "type": { "fill": { "solid": { "color": true } } } },
+                "controlsHoverText":      { "displayName": "Text (hover)",             "displayNameKey": "Prop_CtrlHoverText",     "type": { "fill": { "solid": { "color": true } } } },
+                "controlsSelectedBg":     { "displayName": "Background (selected)",    "displayNameKey": "Prop_CtrlSelBg",         "type": { "fill": { "solid": { "color": true } } } },
+                "controlsSelectedBorder": { "displayName": "Border (selected)",        "displayNameKey": "Prop_CtrlSelBorder",     "type": { "fill": { "solid": { "color": true } } } },
+                "controlsSelectedText":   { "displayName": "Text (selected)",          "displayNameKey": "Prop_CtrlSelText",       "type": { "fill": { "solid": { "color": true } } } },
+                "controlsFontFamily":     { "displayName": "Font",                     "displayNameKey": "Prop_FontFamily",        "type": { "formatting": { "fontFamily": true } } },
+                "controlsSize":           { "displayName": "Font size",                "displayNameKey": "Prop_FontSize",          "type": { "formatting": { "fontSize": true } } },
+                "controlsHeight":         { "displayName": "Pill height (px)",         "displayNameKey": "Prop_CtrlHeight",        "type": { "numeric": true } },
+                "controlsPaddingV":       { "displayName": "Pill padding-Y (px)",      "displayNameKey": "Prop_CtrlPadV",          "type": { "numeric": true } },
+                "controlsPaddingH":       { "displayName": "Pill padding-X (px)",      "displayNameKey": "Prop_CtrlPadH",          "type": { "numeric": true } },
+                "controlsGap":            { "displayName": "Gap between controls (px)","displayNameKey": "Prop_CtrlGap",           "type": { "numeric": true } },
+                "searchWidth":            { "displayName": "Search input width (px)",  "displayNameKey": "Prop_SearchWidth",       "type": { "numeric": true } }
+            }
+        },
+        "search": {
+            "displayName": "Search",
+            "displayNameKey": "Obj_Search",
+            "properties": {
+                "show":                  { "displayName": "Show search",            "displayNameKey": "Prop_Show",                  "type": { "bool": true } },
+                "placeholder":           { "displayName": "Placeholder text",       "displayNameKey": "Prop_SearchPlaceholder",     "type": { "text": true } },
+                "autoSwitchAllOnSearch": { "displayName": "Auto-switch to All",     "displayNameKey": "Prop_SearchAutoSwitch",      "type": { "bool": true } }
+            }
+        },
+        "sortDefaults": {
+            "displayName": "Sort defaults",
+            "displayNameKey": "Obj_SortDefaults",
+            "properties": {
+                "defaultMode":   { "displayName": "Default mode",   "displayNameKey": "Prop_DefaultMode",   "type": { "enumeration": [
+                    { "value": "flop",   "displayName": "Top over (flop)",   "displayNameKey": "Mode_Flop"   },
+                    { "value": "top",    "displayName": "Top under",         "displayNameKey": "Mode_Top"    },
+                    { "value": "all",    "displayName": "All ranked",        "displayNameKey": "Mode_All"    },
+                    { "value": "pareto", "displayName": "Pareto 20/80",      "displayNameKey": "Mode_Pareto" }
+                ]}},
+                "defaultMetric": { "displayName": "Default metric", "displayNameKey": "Prop_DefaultMetric", "type": { "enumeration": [
+                    { "value": "pct", "displayName": "Percent",       "displayNameKey": "Metric_Pct" },
+                    { "value": "abs", "displayName": "Absolute value","displayNameKey": "Metric_Abs" }
+                ]}},
+                "defaultN":     { "displayName": "Default N",        "displayNameKey": "Prop_DefaultN",     "type": { "enumeration": [
+                    { "value": "auto", "displayName": "Auto", "displayNameKey": "N_Auto" },
+                    { "value": "5",    "displayName": "5",    "displayNameKey": "N_5"    },
+                    { "value": "10",   "displayName": "10",   "displayNameKey": "N_10"   },
+                    { "value": "15",   "displayName": "15",   "displayNameKey": "N_15"   },
+                    { "value": "20",   "displayName": "20",   "displayNameKey": "N_20"   },
+                    { "value": "all",  "displayName": "All",  "displayNameKey": "N_All"  }
+                ]}},
+                "autoNCap":        { "displayName": "Auto N cap",        "displayNameKey": "Prop_AutoNCap",        "type": { "numeric": true } },
+                "modeFlopLabel":   { "displayName": "Mode 'over' label",  "displayNameKey": "Prop_ModeFlopLbl",    "type": { "text": true } },
+                "modeTopLabel":    { "displayName": "Mode 'under' label", "displayNameKey": "Prop_ModeTopLbl",     "type": { "text": true } },
+                "modeAllLabel":    { "displayName": "Mode 'all' label",   "displayNameKey": "Prop_ModeAllLbl",     "type": { "text": true } },
+                "modeParetoLabel": { "displayName": "Mode 'pareto' label","displayNameKey": "Prop_ModeParetoLbl",  "type": { "text": true } }
+            }
+        },
+        "pagination": {
+            "displayName": "Pagination",
+            "displayNameKey": "Obj_Pagination",
+            "properties": {
+                "pageSize":          { "displayName": "Page size",            "displayNameKey": "Prop_PageSize",         "type": { "numeric": true } },
+                "pagerShow":         { "displayName": "Show pager",           "displayNameKey": "Prop_PagerShow",        "type": { "bool": true } },
+                "pagerBg":           { "displayName": "Background",           "displayNameKey": "Prop_PagerBg",          "type": { "fill": { "solid": { "color": true } } } },
+                "pagerBorder":       { "displayName": "Border color",         "displayNameKey": "Prop_PagerBorder",      "type": { "fill": { "solid": { "color": true } } } },
+                "pagerText":         { "displayName": "Text color",           "displayNameKey": "Prop_PagerText",        "type": { "fill": { "solid": { "color": true } } } },
+                "pagerHoverBg":      { "displayName": "Hover background",     "displayNameKey": "Prop_PagerHoverBg",     "type": { "fill": { "solid": { "color": true } } } },
+                "pagerHoverText":    { "displayName": "Hover text",           "displayNameKey": "Prop_PagerHoverText",   "type": { "fill": { "solid": { "color": true } } } },
+                "pagerActiveBg":     { "displayName": "Selected background",  "displayNameKey": "Prop_PagerActiveBg",    "type": { "fill": { "solid": { "color": true } } } },
+                "pagerActiveText":   { "displayName": "Selected text",        "displayNameKey": "Prop_PagerActiveText",  "type": { "fill": { "solid": { "color": true } } } },
+                "pagerRadius":       { "displayName": "Corner radius (px)",   "displayNameKey": "Prop_PagerRadius",      "type": { "numeric": true } },
+                "pagerFontFamily":   { "displayName": "Font",                 "displayNameKey": "Prop_FontFamily",       "type": { "formatting": { "fontFamily": true } } },
+                "pagerFontSize":     { "displayName": "Font size",            "displayNameKey": "Prop_FontSize",         "type": { "formatting": { "fontSize": true } } },
+                "pagerFontBold":     { "displayName": "Bold",                 "displayNameKey": "Prop_Bold",             "type": { "bool": true } },
+                "pagerFontItalic":   { "displayName": "Italic",               "displayNameKey": "Prop_Italic",           "type": { "bool": true } }
+            }
+        },
+        "shine": {
+            "displayName": "Shine effect",
+            "displayNameKey": "Obj_Shine",
+            "properties": {
+                "enabled":  { "displayName": "Enable shine",   "displayNameKey": "Prop_ShineEnabled",  "type": { "bool": true } },
+                "duration": { "displayName": "Duration (ms)",  "displayNameKey": "Prop_ShineDuration", "type": { "numeric": true } }
+            }
+        },
+        "numberFormat": {
+            "displayName": "Number format",
+            "displayNameKey": "Obj_NumberFormat",
+            "properties": {
+                "decimals":            { "displayName": "Absolute decimals", "displayNameKey": "Prop_DecimalsAbs",   "type": { "numeric": true } },
+                "decimalsPct":         { "displayName": "Percent decimals",  "displayNameKey": "Prop_DecimalsPct",   "type": { "numeric": true } },
+                "units":               { "displayName": "Scaling unit",      "displayNameKey": "Prop_ScalingUnit",   "type": { "enumeration": [
+                    { "value": "none", "displayName": "None",         "displayNameKey": "Unit_None" },
+                    { "value": "K",    "displayName": "Thousands (K)","displayNameKey": "Unit_K"    },
+                    { "value": "M",    "displayName": "Millions (M)", "displayNameKey": "Unit_M"    },
+                    { "value": "B",    "displayName": "Billions (B)", "displayNameKey": "Unit_B"    }
+                ]}},
+                "thousandsSeparator":  { "displayName": "Thousands separator", "displayNameKey": "Prop_ThousandsSep", "type": { "enumeration": [
+                    { "value": "space", "displayName": "Space",     "displayNameKey": "Sep_Space" },
+                    { "value": "none",  "displayName": "None",      "displayNameKey": "Sep_None"  },
+                    { "value": "comma", "displayName": "Comma (,)", "displayNameKey": "Sep_Comma" },
+                    { "value": "dot",   "displayName": "Dot (.)",   "displayNameKey": "Sep_Dot"   }
+                ]}},
+                "valueSeparator":      { "displayName": "Abs/pct separator", "displayNameKey": "Prop_ValueSeparator", "type": { "text": true } }
+            }
+        },
+        "animations": {
+            "displayName": "Animations",
+            "displayNameKey": "Obj_Animations",
+            "properties": {
+                "enabled":  { "displayName": "Enable animations", "displayNameKey": "Prop_AnimEnabled",  "type": { "bool": true } },
+                "duration": { "displayName": "Duration (ms)",     "displayNameKey": "Prop_AnimDuration", "type": { "numeric": true } },
+                "easing":   { "displayName": "Easing",            "displayNameKey": "Prop_AnimEasing",   "type": { "enumeration": [
+                    { "value": "easeInOut", "displayName": "Ease in-out", "displayNameKey": "Easing_InOut"  },
+                    { "value": "easeOut",   "displayName": "Ease out",    "displayNameKey": "Easing_Out"    },
+                    { "value": "linear",    "displayName": "Linear",      "displayNameKey": "Easing_Linear" },
+                    { "value": "bounce",    "displayName": "Bounce",      "displayNameKey": "Easing_Bounce" },
+                    { "value": "elastic",   "displayName": "Elastic",     "displayNameKey": "Easing_Elastic"}
+                ]}}
+            }
+        },
+        "state": {
+            "displayName": "Visual state",
+            "displayNameKey": "Obj_State",
+            "properties": {
+                "mode":   { "displayName": "Mode",   "displayNameKey": "Prop_StateMode",   "type": { "text": true } },
+                "metric": { "displayName": "Metric", "displayNameKey": "Prop_StateMetric", "type": { "text": true } },
+                "n":      { "displayName": "N",      "displayNameKey": "Prop_StateN",      "type": { "text": true } },
+                "page":   { "displayName": "Page",   "displayNameKey": "Prop_StatePage",   "type": { "numeric": true } },
+                "search": { "displayName": "Search", "displayNameKey": "Prop_StateSearch", "type": { "text": true } }
+            }
+        }
+    },
+    "supportsHighlight": true,
+    "supportsKeyboardFocus": true,
+    "supportsLandingPage": true,
+    "supportsMultiVisualSelection": true,
+    "supportsSynchronizingFilterState": true,
+    "tooltips": {
+        "supportedTypes": {
+            "default": true,
+            "canvas":  true
+        }
+    },
+    "privileges": [],
+    "sorting": {
+        "default": {}
+    }
+}

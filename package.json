@@ -1,0 +1,29 @@
+{
+  "name": "benchmark-bar-chart",
+  "description": "Horizontal benchmark bars comparing two measures per item",
+  "version": "1.7.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iLoveMyData/benchmark-bar-chart"
+  },
+  "license": "MIT",
+  "scripts": {
+    "pbiviz": "pbiviz",
+    "start": "pbiviz start",
+    "package": "pbiviz package",
+    "lint": "npx eslint ."
+  },
+  "dependencies": {
+    "d3": "^7.9.0",
+    "powerbi-visuals-api": "~5.11.0",
+    "powerbi-visuals-utils-formattingmodel": "^6.0.4",
+    "powerbi-visuals-utils-formattingutils": "^6.1.1"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.3",
+    "@typescript-eslint/eslint-plugin": "^8.8.0",
+    "eslint": "^9.11.1",
+    "eslint-plugin-powerbi-visuals": "^1.0.0",
+    "typescript": "5.5.4"
+  }
+}
