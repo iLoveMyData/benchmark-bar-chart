@@ -1,0 +1,101 @@
+﻿Project,Department,Region,Status,Budget (k$),Actual (k$)
+Cloud Migration Phase 1,IT,North America,Completed,1188,652
+Cloud Migration Phase 2,IT,LATAM,On Hold,192,195
+SAP S/4HANA Upgrade,IT,LATAM,In Progress,804,595
+Salesforce Implementation,IT,Global,On Hold,4910,3118
+Data Lake Modernization,IT,LATAM,In Progress,149,137
+Customer 360 Platform,IT,APAC,Planning,244,173
+Mobile App Redesign,IT,North America,In Progress,103,134
+Website Replatforming,IT,North America,In Progress,4972,5518
+Identity & Access Management,IT,Europe,In Progress,213,119
+Cybersecurity Hardening,IT,Europe,Completed,1153,975
+Zero Trust Network Rollout,IT,North America,Completed,980,693
+Disaster Recovery Setup,IT,North America,Planning,933,769
+AI Copilot Pilot,IT,LATAM,In Progress,943,1448
+MLOps Platform,IT,North America,On Hold,3353,2918
+ERP Consolidation,IT,Europe,Planning,163,241
+Legacy Mainframe Decommission,IT,Global,In Progress,312,267
+EDI Integration,IT,Global,Completed,886,1366
+API Gateway Modernization,IT,Global,Completed,876,1261
+DevOps Toolchain Rollout,IT,APAC,In Progress,585,867
+Observability Stack,IT,North America,On Hold,618,812
+Data Quality Initiative,IT,APAC,Completed,1481,1052
+Master Data Management,IT,LATAM,In Progress,434,320
+Document Management System,IT,North America,On Hold,1052,1137
+Service Desk Automation,IT,APAC,Planning,755,845
+Endpoint Modernization,IT,LATAM,In Progress,751,621
+Global Brand Refresh,Marketing,North America,Completed,876,567
+Q4 Holiday Campaign,Marketing,LATAM,In Progress,720,1127
+Influencer Partnership Program,Marketing,Europe,On Hold,1012,653
+SEO Overhaul,Marketing,LATAM,Planning,1171,1633
+Customer Loyalty Platform,Marketing,LATAM,In Progress,1133,760
+Email Automation Rollout,Marketing,LATAM,In Progress,745,1112
+Content Hub Launch,Marketing,Europe,On Hold,1128,1411
+Trade Show Series 2026,Marketing,Global,Planning,1282,726
+Voice of Customer Program,Marketing,LATAM,Completed,917,1328
+Marketing Mix Modeling,Marketing,Global,On Hold,90,53
+Workday Implementation,HR,Europe,On Hold,530,600
+Performance Management Revamp,HR,North America,On Hold,4182,4227
+Employee Engagement Survey,HR,Global,Planning,153,221
+Diversity & Inclusion Program,HR,North America,On Hold,133,80
+Leadership Academy,HR,APAC,Planning,1159,1584
+Onboarding Modernization,HR,North America,In Progress,1447,1966
+Compensation Benchmark Study,HR,Europe,On Hold,1084,1124
+Hybrid Workplace Rollout,HR,North America,On Hold,498,260
+Wellness Initiative,HR,North America,In Progress,1114,826
+Succession Planning,HR,Europe,On Hold,157,200
+SOX Compliance Program,Finance,North America,Planning,1485,2056
+IFRS 17 Implementation,Finance,APAC,Planning,720,1000
+Treasury Modernization,Finance,APAC,Completed,4678,3472
+Tax Reporting Automation,Finance,LATAM,Completed,95,68
+Procure-to-Pay Redesign,Finance,LATAM,Completed,88,101
+Order-to-Cash Optimization,Finance,APAC,In Progress,3294,3197
+Audit Readiness Initiative,Finance,North America,Completed,135,215
+Internal Controls Refresh,Finance,Global,Completed,1304,657
+Anti-Money Laundering Tooling,Finance,Europe,Completed,2869,3087
+Group Consolidation Platform,Finance,LATAM,In Progress,514,503
+Warehouse Management Upgrade,Operations,Global,Planning,128,175
+Logistics Network Redesign,Operations,Global,In Progress,1614,729
+Supplier Portal Launch,Operations,APAC,On Hold,3768,3748
+Demand Planning Platform,Operations,Global,In Progress,121,111
+Manufacturing Execution System,Operations,Global,Planning,113,120
+Plant Modernization Phase 1,Operations,Europe,In Progress,1406,1356
+Plant Modernization Phase 2,Operations,Global,Planning,3769,4820
+Quality Management Rollout,Operations,Europe,Planning,461,503
+Distribution Center Expansion,Operations,LATAM,In Progress,1104,911
+Last-Mile Optimization,Operations,APAC,Completed,1237,908
+Fleet Telematics Deployment,Operations,Global,In Progress,4661,2281
+Inventory Optimization,Operations,APAC,Planning,482,644
+S&OP Platform,Operations,Global,Planning,1343,1555
+Procurement Digitization,Operations,LATAM,In Progress,1396,1348
+Returns Management Overhaul,Operations,Global,In Progress,512,432
+Product X Launch,R&D,APAC,Completed,1024,1187
+Product Y Phase 2 Release,R&D,APAC,In Progress,4415,4916
+R&D Lab Expansion,R&D,APAC,On Hold,576,390
+Patent Portfolio Refresh,R&D,Global,Completed,644,953
+Clinical Trial Platform,R&D,LATAM,In Progress,3835,5976
+Innovation Sandbox,R&D,APAC,In Progress,1465,1500
+New Materials Research,R&D,APAC,In Progress,996,654
+Prototype Tooling,R&D,North America,In Progress,1482,1629
+Sustainability R&D,R&D,APAC,In Progress,191,173
+Open Source Contribution Program,R&D,Global,In Progress,505,727
+ABC Corp Acquisition,Strategy,Global,On Hold,528,372
+XYZ Holdings Acquisition,Strategy,LATAM,In Progress,237,316
+Joint Venture with PartnerCo,Strategy,Europe,Planning,871,1293
+APAC Market Entry,Strategy,North America,Completed,422,346
+LATAM Expansion,Strategy,Global,In Progress,140,189
+Divestiture of Unit Z,Strategy,Europe,On Hold,671,489
+Carve-Out Project Alpha,Strategy,North America,Planning,1245,711
+Post-Merger Integration,Strategy,APAC,Completed,1242,1039
+Strategic Partnership Program,Strategy,LATAM,On Hold,789,897
+Competitor Intelligence Platform,Strategy,APAC,On Hold,210,174
+HQ Renovation,Facilities,North America,In Progress,254,168
+Regional Office Consolidation,Facilities,North America,In Progress,2907,1439
+Smart Building Pilot,Facilities,Europe,In Progress,309,256
+Solar Roof Installation,Facilities,APAC,Planning,420,403
+Data Center Cooling Retrofit,Facilities,North America,In Progress,1189,1377
+Workplace Sensor Deployment,Facilities,Europe,Completed,1904,1648
+EV Charging Infrastructure,Facilities,LATAM,Completed,1390,716
+Sustainability Audit,Facilities,Global,Completed,550,636
+Net-Zero Roadmap,Facilities,LATAM,Completed,962,1463
+Facilities Cost Optimization,Facilities,LATAM,In Progress,1146,1824

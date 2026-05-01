@@ -96,6 +96,10 @@ Requires Node.js 18+, [`pbiviz`](https://learn.microsoft.com/power-bi/developer/
 
 The visual computes `gap = actual − reference` and `gap% = gap / reference` per row, then classifies each item into one of the five variance zones.
 
+## Demo dataset
+
+A ready-to-use 100-row enterprise portfolio is provided in [`examples/projects-demo.csv`](./examples/projects-demo.csv) — see [`examples/README.md`](./examples/README.md) for column descriptions and binding instructions.
+
 ---
 
 ## Roadmap
