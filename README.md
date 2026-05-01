@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/marketplace-logo.png" alt="Benchmark Bar Chart logo" width="200" />
+</p>
+
 # Benchmark Bar Chart
 
 A horizontal-bar Power BI custom visual that compares **two measures per item** (e.g. _budget vs actual_, _target vs realized_, _baseline vs current_) and surfaces the items with the largest variances — instantly.
